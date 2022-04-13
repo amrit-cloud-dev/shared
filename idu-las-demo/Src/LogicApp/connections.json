@@ -1,0 +1,29 @@
+{
+  "managedApiConnections": {
+    "azureblob": {
+      "api": {
+        "id": "/subscriptions/247fe786-b1f3-4096-9352-bee2d3508844/providers/Microsoft.Web/locations/australiasoutheast/managedApis/azureblob"
+      },
+      "connection": {
+        "id": "/subscriptions/247fe786-b1f3-4096-9352-bee2d3508844/resourceGroups/vel-la-demo-ase-dev/providers/Microsoft.Web/connections/azureblob-3"
+      },
+      "connectionRuntimeUrl": "https://4d61367119406998.10.common.logic-australiasoutheast.azure-apihub.net/apim/azureblob/032d71f1e18347bab82967e80b61b990/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('azureblob-connectionKey')"
+      }
+    }
+  },
+  "serviceProviderConnections": {
+    "serviceBus": {
+      "parameterValues": {
+        "connectionString": "@appsetting('SERVICE_BUS_CONNECTION_STRING')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/serviceBus"
+      },
+      "displayName": "serviceBusConnection"
+    }
+  }
+}

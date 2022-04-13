@@ -1,0 +1,6 @@
+{
+  "serviceBusQueueName": {
+    "type": "String",
+    "value": "sbq-logic-app-demo"
+  }
+}

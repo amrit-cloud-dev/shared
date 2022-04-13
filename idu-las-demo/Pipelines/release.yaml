@@ -1,0 +1,54 @@
+parameters:
+  - name: environment
+    type: string
+
+jobs:
+- deployment: deployToAzure
+  displayName: 'Deploy to ${{parameters.environment}}'
+  environment: ${{parameters.environment}}
+
+  variables:
+    - name: deploymentName
+      value: main-$(Build.BuildNumber)
+    - name: azureConnection
+      value: 'Vel-VS-May2022'
+    - name: locationCode
+      value: 'ase'
+    - name: location
+      value: 'australiasoutheast'
+    - name: resourceGroupName
+      value: $(Build.DefinitionName)-$(locationCode)-$(System.StageName)
+
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              targetPath: '$(System.ArtifactsDirectory)'
+          
+          - task: AzureCLI@2
+            displayName: 'Deploy Bicep Templates'
+            inputs:
+              azureSubscription: ${{variables.azureConnection}}
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az group create -n ${{variables.resourceGroupName}} -l $(location)
+                $deploymentOutputs = $(az deployment group create  `
+                -f $(System.ArtifactsDirectory)/Deployment/main.bicep `
+                -g ${{variables.resourceGroupName}} `
+                -p releaseId=$(Build.BuildNumber) environment=${{parameters.environment}} `
+                -n ${{variables.deploymentName}} --query properties.outputs) | ConvertFrom-JSON
+                $bicepOutputObj.PSObject.Properties | ForEach-Object { Write-Output "##vso[task.setvariable variable=$_.Name;]$_.Value.value" }
+              
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy LogicApp'
+            inputs:
+              azureSubscription: ${{variables.azureConnection}}
+              appType: functionApp
+              appName: '$(LogicAppName)'
+              package: '$(System.ArtifactsDirectory)/$(Build.BuildId).zip'
+              deploymentMethod: zipDeploy

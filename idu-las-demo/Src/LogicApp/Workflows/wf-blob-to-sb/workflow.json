@@ -1,0 +1,67 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Lists_blobs_(V2)": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "azureblob"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent(appsetting('STORAGE_ACCOUNT_NAME')))}/foldersV2/@{encodeURIComponent(encodeURIComponent('JTJmbG9naWMtYXBwLWRlbW8tZmlsZXM='))}",
+                    "queries": {
+                        "nextPageMarker": "",
+                        "useFlatListing": false
+                    }
+                },
+                "runAfter": {},
+                "metadata": {
+                    "JTJmbG9naWMtYXBwLWRlbW8tZmlsZXM=": "/logic-app-demo-files"
+                }
+            },
+            "For_each": {
+                "type": "Foreach",
+                "foreach": "@body('Lists_blobs_(V2)')?['value']",
+                "actions": {
+                    "Send_message": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "entityName": "@parameters('serviceBusQueueName')",
+                                "message": {
+                                    "contentData": "@items('For_each')?['DisplayName']"
+                                }
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "serviceBus",
+                                "operationId": "sendMessage",
+                                "serviceProviderId": "/serviceProviders/serviceBus"
+                            }
+                        },
+                        "runAfter": {}
+                    }
+                },
+                "runAfter": {
+                    "Lists_blobs_(V2)": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "frequency": "Minute",
+                    "interval": 15
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

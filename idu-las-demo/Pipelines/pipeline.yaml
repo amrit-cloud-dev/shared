@@ -1,0 +1,31 @@
+name: $(Date:ddMMyyyy).$(Rev:r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: System.Debug
+    value: true
+    
+stages:
+  - stage: build
+    jobs:
+    - template: build.yaml
+  
+  - stage: test
+    jobs:
+    - template: release.yaml
+      parameters:
+        environment: 'test'
+
+  - stage: prod
+    jobs:
+    - template: release.yaml
+      parameters:
+        environment: 'prod'

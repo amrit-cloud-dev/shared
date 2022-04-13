@@ -1,0 +1,27 @@
+steps:
+  - task: CopyFiles@2
+    displayName: 'Copy LogicApp Project Files'
+    inputs:
+      SourceFolder: 'Src/LogicApp'
+      Contents: |
+        host.json
+        proxies.json
+        Artifacts/**
+        connections.azure.json
+        parameters.json
+      TargetFolder: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Workflows'
+    inputs:
+      SourceFolder: 'Src/LogicApp/Workflows'
+      TargetFolder: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)'
+
+  - powershell: 'Rename-Item $(System.DefaultWorkingDirectory)/$(Build.BuildId)/connections.azure.json connections.json '
+    displayName: 'Rename Connection File'
+
+  - task: ArchiveFiles@2
+    displayName: 'Package Logic Apps Project'
+    inputs:
+      rootFolderOrFile: '$(System.DefaultWorkingDirectory)/$(Build.BuildId)'
+      includeRootFolder: false

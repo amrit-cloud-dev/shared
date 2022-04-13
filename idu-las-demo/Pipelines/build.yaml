@@ -1,0 +1,16 @@
+jobs:
+  - job:
+    displayName: 'Build_And_Pakcage'
+    steps:
+  
+      - task: CopyFiles@2
+        displayName: 'Copy Deployment Files'
+        inputs:
+          SourceFolder: 'Deployment/'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment/'
+          CleanTargetFolder: true
+      
+      - template: packageLogicApp.yaml
+          
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifacts'
